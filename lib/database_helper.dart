@@ -64,11 +64,11 @@ class AWord {
   }
 }
 // singleton class to manage the database
-class CategoryHelper {
+class DatabaseHelper {
   static final _databaseName = "Word-Puzzle.db";
   static final _databaseVersion = 1;
-  CategoryHelper._privateConstructor();
-  static final CategoryHelper instance = CategoryHelper._privateConstructor();
+  DatabaseHelper._privateConstructor();
+  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
   static Database _database;
   Future<Database> get database async {
     if (_database != null) return _database;
@@ -199,5 +199,17 @@ class CategoryHelper {
     final db = await this.database;
     var result = await db.delete(tableCategories, where: 'category = ?', whereArgs: [c]);
     return result;
+  }
+  Future<int> updateBestTime(String cat, int secs) async {
+    final db = await this.database;
+    await db.update(
+      '$tableCategories',
+      ACategory.withTime(cat, secs.toString()).toMap(),
+      where: "category = ?",
+      whereArgs: [cat],
+    );
+//    var result = await db.update(table, values)
+
+
   }
 }

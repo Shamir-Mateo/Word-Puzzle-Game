@@ -15,16 +15,29 @@ void main() {
 
   runApp(MaterialApp(
     title: 'Word Puzzle',
-    home: TodosScreen(),
+    home: selectGameScreen(),
   ));
 }
 
-class TodosScreen extends StatelessWidget {
+class selectGameScreen extends StatelessWidget {
   List<ACategory> categories;
   List<List<AWord>> allWords = [];
   
-  TodosScreen({Key key}) : super(key: key);
+  selectGameScreen({Key key}) : super(key: key);
 
+  _navigateAndDisplaySelection(BuildContext context, int index) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GameWidget(category: categories[index].category, words: allWords[index], bestTime: categories[index].time)),
+    );
+    ACategory rc = result;
+    print(rc);
+    int i = 0;
+    for(i = 0; i< categories.length; i++)
+      if(categories[i].category == rc.category)
+        break;
+    categories[i].time = rc.time;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +64,7 @@ class TodosScreen extends StatelessWidget {
                       title: Text(categories[index].category),
                       subtitle: Text(categories[index].time),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GameWidget(category: categories[index].category, words: allWords[index], bestTime: categories[index].time),
-                          ),
-                        );
+                        _navigateAndDisplaySelection(context, index);
                       },
                     );
                   },
@@ -117,31 +125,32 @@ class _GameWidgetState extends State<GameWidget> {
   bool isActive = false;
   Timer timer;
   void handleTick() {
-//    if(isActive) {
       setState(() {
         secondsPassed = secondsPassed + 1;
       });
-//    }
   }
   
   void finishGame(){
-    Navigator.of(context).pop();
+    DatabaseHelper helper = DatabaseHelper.instance;
+    helper.updateBestTime(widget.category, secondsPassed);
+    timer.cancel();
+    
+    Navigator.pop(context, ACategory.withTime(widget.category, secondsPassed.toString()));
     showDialog(context: context, child:
         new AlertDialog(
           title: new Text("Congratulations!"),
           content: new Text("Your Score is ${secondsPassed ~/ 60} m ${secondsPassed % 60} s"),
         )
     );
-    timer.cancel();
   }
 
   void _incrementDown(PointerEvent details) {
     _updateLocation(details); 
-    setState(() {
+    finishGame();
+/*    setState(() {
       touchItems.clear();
       validTouchFlag = true;
-    });
-    finishGame();
+    });*/
 //    print("down");
   }
   void _incrementUp(PointerEvent details) {
@@ -210,7 +219,6 @@ class _GameWidgetState extends State<GameWidget> {
 
     int seconds = secondsPassed % 60;
     int minutes = secondsPassed ~/ 60;
-    print("Updated");
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 10),
