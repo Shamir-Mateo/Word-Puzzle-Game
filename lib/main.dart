@@ -81,14 +81,14 @@ class TodosScreen extends StatelessWidget {
 
 
 
-int gridW = 10;
-int gridH = 10;
-double gridSize = 30.0;
 List<List<String>> gridMap = [];
-List<String> wordsList = [];
+double gridSize;
 class DetailScreen extends StatelessWidget {
   final String category;
   final List<AWord> words;
+  int gridW;
+  int gridH;
+  List<String> wordsList = [];
   Size panSize;
 
   DetailScreen({Key key, @required this.category, @required this.words}) : super(key: key);
@@ -132,6 +132,9 @@ class DetailScreen extends StatelessWidget {
   }
   
   Future _initializeGame() async {
+    gridSize = 20.0;
+    gridH = 15;
+    gridW = 15;
     gridMap = List<List<String>>.generate(gridH, (i) => List<String>.generate(gridW, (j) => ""));
     panSize = Size(gridW.toDouble() * gridSize, gridH.toDouble() * gridSize);
     wordsList = List<String>.generate(words.length, (index) => words[index].word);
@@ -140,14 +143,58 @@ class DetailScreen extends StatelessWidget {
     var random = new Random();
     if(wordsList.length == 0)
       return;
+    print(wordsList);
+    var first = generate(random.nextInt(8), wordsList[0]);
+    Point pt = Point(random.nextInt(gridW -first.first.length + 1),random.nextInt(gridH - first.length + 1));
+    putOnGrid(first, pt);
+    for(int wi = 1; wi < wordsList.length; wi++){
+      int dir;
+      checkFound:
+      for(dir = 0; dir < 8; dir++){ //find if words match exist
+        var piece = generate(dir, wordsList[wi]);
+        for(int i = 0; i < gridH - piece.length; i++)
+          for(int j = 0; j < gridW - piece.first.length; j++){
+            int matchCharCount = 0, dismatchCharCount = 0;
+            for(int ii = 0; ii < piece.length; ii++)
+              for(int jj = 0; jj < piece.first.length; jj++)
+                if(piece[ii][jj] == gridMap[i+ii][j+jj] && piece[ii][jj] != "")
+                  matchCharCount ++;
+                else if(piece[ii][jj] != gridMap[i+ii][j+jj] && gridMap[i+ii][j+jj] != "")
+                  dismatchCharCount ++;
+            if(matchCharCount > 0 && dismatchCharCount == 0){
+              putOnGrid(piece, Point(j,i));
+              break checkFound;
+            }
+          }
+      }
+      if(dir == 8){
+        putAsAnother:
+        while(true){
+          var piece = generate(random.nextInt(8), wordsList[wi]);
+          int i = random.nextInt(gridH - piece.length);
+          int j = random.nextInt(gridW - piece.first.length);
+          int matchCharCount = 0;
+          for(int ii = 0; ii < piece.length; ii++)
+            for(int jj = 0; jj < piece.first.length; jj++)
+              if(gridMap[i+ii][j+jj] != "")
+                matchCharCount ++;
+          if(matchCharCount == 0){
+//                print("Matching count $matchCharCount $dismatchCharCount");
+            putOnGrid(piece, Point(j,i));
+            break putAsAnother;
+          }
+        }
+      }
+    }
     
-//    int direction = random.nextInt(8);
-    var first = generate(5, wordsList[0]);
-    Point pt = Point(random.nextInt(gridW),random.nextInt(gridH));
-    print(first);
 
 //    print(wordsList);
 //    print(panSize);
+  }
+  void putOnGrid(List<List<String>> piece, Point pt){
+    for(int i = 0; i < piece.length; i++)
+      for(int j = 0; j < piece[i].length; j++)
+        gridMap[pt.y + i][pt.x + j] = piece[i][j];
   }
   List<List<String>> generate(int direction, String aword){
     List<List<String>> grid;
@@ -189,7 +236,7 @@ class FaceOutlinePainter extends CustomPainter {
           final textSpan = TextSpan( text: gridMap[i][j], style: textStyle);
           final textPainter = TextPainter( text: textSpan, textDirection: TextDirection.ltr );
           textPainter.layout();
-          final offset = Offset(i * gridSize + (gridSize - textPainter.width) / 2, j * gridSize);
+          final offset = Offset(j * gridSize + (gridSize - textPainter.width) / 2, i * gridSize);
           textPainter.paint(canvas, offset);
         }
   }
