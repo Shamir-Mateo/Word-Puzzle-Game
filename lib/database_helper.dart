@@ -20,7 +20,7 @@ class ACategory {
   String time;
   ACategory(String c){
     category = c;
-    time = "0.0s";
+    time = "00:00";
   }
   ACategory.withTime(this.category, this.time){
     this.category = category;
@@ -104,6 +104,7 @@ class CategoryHelper {
   Future<int> initializeDatabase() async {
     if(isInitialized == true)
       return 0;
+    print("Initializing database");
     Database db = await database;
     await db.rawQuery('delete from $tableCategories');
     await db.rawQuery('delete from $tableWords');
@@ -121,18 +122,18 @@ class CategoryHelper {
     List<String> wmakeup = ['hair dye','eyeshadow','mascara','eyeliner','blusher','foundation','lipstick','lip gloss','face powder','tweezers','mirror','concealer','brush','lip liner'];
     List<String> wfamily = ['grandmother','grandfather','mother','father','uncle','aunt','brother','sister','son','daughter','cousin','grandson','granddaughter','niece','nephew'];
     for(int i = 0; i < cats.length; i++)  await db.insert(tableCategories, ACategory(cats[i]).toMap());
-    for(int i = 0; i< wface.length; await db.insert(tableWords, AWord('Face', wface[i]).toMap()), i++); 
-    for(int i = 0; i< wfruits.length; await db.insert(tableWords, AWord('Fruits', wfruits[i]).toMap()), i++); 
-    for(int i = 0; i< wvegetables.length; await db.insert(tableWords, AWord('Vegetables', wvegetables[i]).toMap()), i++); 
-    for(int i = 0; i< wcolors.length; await db.insert(tableWords, AWord('Colors', wcolors[i]).toMap()), i++); 
-    for(int i = 0; i< woccupations.length; await db.insert(tableWords, AWord('Occupations', woccupations[i]).toMap()), i++); 
-    for(int i = 0; i< wmusical.length; await db.insert(tableWords, AWord('Musical Instruments', wmusical[i]).toMap()), i++); 
-    for(int i = 0; i< wflowers.length; await db.insert(tableWords, AWord('Flowers', wflowers[i]).toMap()), i++); 
-    for(int i = 0; i< wbar.length; await db.insert(tableWords, AWord('Bar', wbar[i]).toMap()), i++); 
-    for(int i = 0; i< wbathroom.length; await db.insert(tableWords, AWord('Bathroom', wbathroom[i]).toMap()), i++); 
-    for(int i = 0; i< whouse.length; await db.insert(tableWords, AWord('House', whouse[i]).toMap()), i++); 
-    for(int i = 0; i< wmakeup.length; await db.insert(tableWords, AWord('Makeup', wmakeup[i]).toMap()), i++); 
-    for(int i = 0; i< wfamily.length; await db.insert(tableWords, AWord('Family', wfamily[i]).toMap()), i++);
+    for(int i = 0; i< wface.length; i++) await db.insert(tableWords, AWord('Face', wface[i]).toMap());
+    for(int i = 0; i< wfruits.length; i++) await db.insert(tableWords, AWord('Fruits', wfruits[i]).toMap());
+    for(int i = 0; i< wvegetables.length; i++) await db.insert(tableWords, AWord('Vegetables', wvegetables[i]).toMap());
+    for(int i = 0; i< wcolors.length; i++) await db.insert(tableWords, AWord('Colors', wcolors[i]).toMap());
+    for(int i = 0; i< woccupations.length; i++) await db.insert(tableWords, AWord('Occupations', woccupations[i]).toMap());
+    for(int i = 0; i< wmusical.length; i++) await db.insert(tableWords, AWord('Musical Instruments', wmusical[i]).toMap());
+    for(int i = 0; i< wflowers.length; i++) await db.insert(tableWords, AWord('Flowers', wflowers[i]).toMap());
+    for(int i = 0; i< wbar.length; i++) await db.insert(tableWords, AWord('Bar', wbar[i]).toMap());
+    for(int i = 0; i< wbathroom.length; i++) await db.insert(tableWords, AWord('Bathroom', wbathroom[i]).toMap());
+    for(int i = 0; i< whouse.length; i++) await db.insert(tableWords, AWord('House', whouse[i]).toMap());
+    for(int i = 0; i< wmakeup.length; i++) await db.insert(tableWords, AWord('Makeup', wmakeup[i]).toMap());
+    for(int i = 0; i< wfamily.length; i++) await db.insert(tableWords, AWord('Family', wfamily[i]).toMap());
     isInitialized = true;
     return 1;
   }
@@ -199,7 +200,4 @@ class CategoryHelper {
     var result = await db.delete(tableCategories, where: 'category = ?', whereArgs: [c]);
     return result;
   }
-  // TODO: queryAllWords()
-  // TODO: delete(int id)
-  // TODO: update(Word word)
 }
