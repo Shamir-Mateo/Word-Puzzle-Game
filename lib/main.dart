@@ -15,32 +15,40 @@ void main() {
 
   runApp(MaterialApp(
     title: 'Word Puzzle',
-    home: selectGameScreen(),
+    home: SelectWidget(),
   ));
 }
 
-class selectGameScreen extends StatelessWidget {
+class SelectWidget extends StatefulWidget {
+  SelectWidget({Key key}) : super(key: key);
+  @override
+  _SelectWidgetState createState() => _SelectWidgetState();
+}
+
+
+double deviceWidth = 0.0 ; 
+class _SelectWidgetState extends State<SelectWidget> {
   List<ACategory> categories;
   List<List<AWord>> allWords = [];
-  
-  selectGameScreen({Key key}) : super(key: key);
+  List<Color> colorList = [];
+
+  getHeightWidth(context){
+    deviceWidth = MediaQuery.of(context).size.width;
+  }
+
 
   _navigateAndDisplaySelection(BuildContext context, int index) async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => GameWidget(category: categories[index].category, words: allWords[index], bestTime: categories[index].time)),
     );
-    ACategory rc = result;
-    print(rc);
-    int i = 0;
-    for(i = 0; i< categories.length; i++)
-      if(categories[i].category == rc.category)
-        break;
-    categories[i].time = rc.time;
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    getHeightWidth(context);
+    //print(deviceWidth);
     return FutureBuilder(
       future: _initializeDatabase(), // function where you call your api
       builder: (BuildContext context, AsyncSnapshot snapshot) {  // AsyncSnapshot<Your object type>
@@ -60,12 +68,70 @@ class selectGameScreen extends StatelessWidget {
                 body: ListView.builder(
                   itemCount: categories.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
+                    /*return ListTile(
+                      leading: Icon(Icons.wb_sunny),
                       title: Text(categories[index].category),
                       subtitle: Text(categories[index].time),
                       onTap: () {
                         _navigateAndDisplaySelection(context, index);
                       },
+                    );*/
+                    return Container(
+                      height: 100,
+                      color:Colors.white,
+                      child:Card(
+                        child: InkWell(
+                          onTap: () {
+                            _navigateAndDisplaySelection(context, index);
+                          },
+                          hoverColor: Colors.blue,
+                          
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 3.0, right: 3.0),
+  //                        color: Colors.red,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: colorList[index % colorList.length],
+                              //boxShadow: [ BoxShadow(color: Colors.pink, spreadRadius: 2), ],
+                            ),
+                            child: Padding(padding: EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Row(children: <Widget>[
+                                    Text(categories[index].category, style: new TextStyle(
+                                      fontSize: 25.0,
+                                      fontFamily: 'listFont',
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ))
+                                  ]),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    
+                                    children: <Widget>[
+                                    Row(
+                                      children: <Widget>[
+                                        Text("   "),
+                                        Icon(IconData(57746, fontFamily: 'MaterialIcons'), color:Colors.white),
+                                        Text("   "),        
+                                        Text(categories[index].time, style: new TextStyle(fontSize: 20, color: Colors.white)),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(IconData(58683, fontFamily: 'MaterialIcons'), color:Colors.white),        
+                                        Text(allWords[index].length.toString(), style: new TextStyle(fontSize: 20, color: Colors.white)),
+                                        Text("   "),
+                                      ],
+                                    ),
+                                  ],)
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
                     );
                   },
                 ),
@@ -81,7 +147,15 @@ class selectGameScreen extends StatelessWidget {
     int ccount = await helper.getCategoryCount();
     int wcount = await helper.getAllWordsCount();
     categories = await helper.getAllCategories();
-    
+
+    colorList.add(Colors.deepOrange[400]);
+    colorList.add(Colors.orangeAccent[400]);
+    colorList.add(Colors.purpleAccent[400]);
+    colorList.add(Colors.redAccent[400]);
+    colorList.add(Colors.lightGreen[900]);
+    colorList.add(Colors.indigoAccent);
+    colorList.add(Colors.redAccent[400]);
+
     for(int i = 0; i< categories.length; i++){
       allWords.add(await helper.getWords(categories[i].category));
     }
@@ -146,12 +220,11 @@ class _GameWidgetState extends State<GameWidget> {
 
   void _incrementDown(PointerEvent details) {
     _updateLocation(details); 
-    finishGame();
-/*    setState(() {
+//    finishGame();
+    setState(() {
       touchItems.clear();
       validTouchFlag = true;
-    });*/
-//    print("down");
+    });
   }
   void _incrementUp(PointerEvent details) {
     _updateLocation(details);
@@ -166,11 +239,9 @@ class _GameWidgetState extends State<GameWidget> {
 
       if(foundWords.length == wordsList.length)
         finishGame();
-      print(foundWords);
 
     }
-      touchItems.clear();
-//    print("up");
+    touchItems.clear();
   }
   void _updateLocation(PointerEvent details) {
     if(validTouchFlag == true)
@@ -209,11 +280,7 @@ class _GameWidgetState extends State<GameWidget> {
 
 
   Widget build(BuildContext context) {
-    if (timer == null)
-    timer = Timer.periodic(duration, (Timer t)
-    {
-      handleTick();
-    });
+    if (timer == null) timer = Timer.periodic(duration, (Timer t) { handleTick(); });
 
     
 
@@ -222,15 +289,19 @@ class _GameWidgetState extends State<GameWidget> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 10),
-        color: Colors.white,
+        color: Colors.cyan,
         child:Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             Center(
               child:Container(
                 alignment: Alignment.topRight,
-                child: Row(children: <Widget>[
+                margin: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
                   Container(
-                  margin: EdgeInsets.symmetric(horizontal: 5),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
                   padding: EdgeInsets.all(5),
                   decoration: new BoxDecoration( borderRadius: new BorderRadius.circular(10), color: Colors.cyan[800]),
                   child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
@@ -286,7 +357,8 @@ class _GameWidgetState extends State<GameWidget> {
                           Container(
                             width: panSize.width,
                             height: panSize.height,
-                            color: Colors.white,
+                            decoration: new BoxDecoration( borderRadius: new BorderRadius.circular(10), color: Colors.cyan[200]),
+                            //color: Colors.white,
                             child: CustomPaint(painter: CharacterMapPainter(), key: _keyRed),
                           ),
                         ]
@@ -297,26 +369,28 @@ class _GameWidgetState extends State<GameWidget> {
               ),
             ),
             Container(
-              width: 300,
-              height: 200,
+              width: deviceWidth * 0.8,
+              height: (wordsList.length * 8).toDouble(),
               child: GridView.count(
                 primary: false,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(0),
                 //crossAxisSpacing: 10,
                 //mainAxisSpacing: 1 / 10,
                 crossAxisCount: 3,
-                childAspectRatio: 3,
+                childAspectRatio: 4,
                 children: wordsList.map((data) =>
         
                 Container(
+                    margin:EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                   child: Container(
-                    margin:EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-
+                    
                     //color: Colors.green,
                     child: Center(
                         child: Text(data, 
                         style: TextStyle(
-                            fontSize: 16, 
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold, 
+                            //fontFamily: 'wordsFont',
                             color: foundWords.contains(data)? foundColor[foundWords.indexOf(data)] : Colors.black,
                           ), 
                         textAlign: TextAlign.center
@@ -336,9 +410,11 @@ class _GameWidgetState extends State<GameWidget> {
     );
   }
   void _initializeGame() {
-    gridSize = 20.0;
     gridH = 15;
     gridW = 15;
+    gridSize = (deviceWidth-20) / gridW;
+    //print(wi;
+    
     gridMap = List<List<String>>.generate(gridH, (i) => List<String>.generate(gridW, (j) => ""));
     panSize = Size(gridW.toDouble() * gridSize, gridH.toDouble() * gridSize);
     wordsList = List<String>.generate(widget.words.length, (index) => widget.words[index].word);
@@ -387,6 +463,12 @@ class _GameWidgetState extends State<GameWidget> {
         }
       }
     }
+
+    String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for(int i = 0; i < gridMap.length; i++)
+      for(int j = 0; j < gridMap[i].length; j++)
+        if(gridMap[i][j] == "")
+          gridMap[i][j] = chars[random.nextInt(26)];
   }
   void putOnGrid(List<List<String>> piece, Point pt){
     for(int i = 0; i < piece.length; i++)
@@ -414,6 +496,13 @@ class _GameWidgetState extends State<GameWidget> {
     }
     return grid;
   }
+
+  @override
+  void dispose(){
+    if(timer != null)
+      timer.cancel();
+    super.dispose();
+  }
 }
 
 class CharacterMapPainter extends CustomPainter {
@@ -422,15 +511,14 @@ class CharacterMapPainter extends CustomPainter {
     // Define a paint object
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0
-      ..color = Colors.indigo;
+      ..strokeWidth = 2.0
+      ..color = Colors.cyan[200]
+      ;
     // Left eye
-//    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(20)), paint);
-    
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(10)), paint);
     for(int i = 0; i< gridMap.length; i++)
       for(int j = 0; j < gridMap[i].length; j++){
-          final textStyle = TextStyle( color: Colors.black, fontSize: 20);
+          final textStyle = TextStyle( color: Colors.cyan[900], fontSize: 13, fontWeight: FontWeight.bold);
           final textSpan = TextSpan( text: gridMap[i][j], style: textStyle);
           final textPainter = TextPainter( text: textSpan, textDirection: TextDirection.ltr );
           textPainter.layout();
@@ -447,14 +535,11 @@ class CharacterMapPainter extends CustomPainter {
       offset.clear();
       path.reset();
       paint.color = foundColor[i];
-
-      //print(paint.color);
       for(int j = 0; j < foundMap[i].length ; j++)
         offset.add(Offset(foundMap[i][j].x * gridSize + gridSize / 2,foundMap[i][j].y * gridSize + gridSize / 2));
       path.addPolygon(offset, false);
       canvas.drawPath(path, paint);
     }
-    //print(foundMap);
 
     //----- Current drawing
     List<Offset> offsets = [];
@@ -464,12 +549,6 @@ class CharacterMapPainter extends CustomPainter {
     path.addPolygon(offsets, false);
     paint.color = Color.fromRGBO(255, 0, 0, 80);
     canvas.drawPath(path, paint);
-//    for(int i = 1; i < touchItems.length ; i++)
-//      canvas.drawLine(Offset(touchItems[i-1].x * gridSize + gridSize / 2,touchItems[i-1].y * gridSize + gridSize / 2), Offset(touchItems[i].x * gridSize + gridSize / 2,touchItems[i].y * gridSize + gridSize / 2), paint);
-
-//    for(int i = 1; i< touchPoints.length; i++)
-//      canvas.drawLine(touchPoints[i-1], touchPoints[i], paint);
-    //print(gridMap);
   }
 
   @override

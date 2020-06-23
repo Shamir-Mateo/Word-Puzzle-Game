@@ -5,14 +5,13 @@ import 'package:path_provider/path_provider.dart';
 
 
 // database table and column names
+final String databaseName = 'Word-Puzzle.db';
 final String tableCategories = 'categories';
 final String tableWords = 'words';
 
 final String columnCategory = 'category';
 final String columnTime = 'time';
 final String columnWord = 'word';
-
-bool isInitialized = false;
 
 // data model class
 class ACategory {
@@ -65,7 +64,7 @@ class AWord {
 }
 // singleton class to manage the database
 class DatabaseHelper {
-  static final _databaseName = "Word-Puzzle.db";
+  static final _databaseName = "$databaseName";
   static final _databaseVersion = 1;
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -100,10 +99,14 @@ class DatabaseHelper {
   }
 
   // Database helper methods:
-
+  Future<bool> databaseExists(String path) => databaseFactory.databaseExists(path);
   Future<int> initializeDatabase() async {
-    if(isInitialized == true)
-      return 0;
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, _databaseName);
+    bool isExist = await databaseExists(path);
+    
+    if(isExist)      return 0;
+
     print("Initializing database");
     Database db = await database;
     await db.rawQuery('delete from $tableCategories');
@@ -121,20 +124,20 @@ class DatabaseHelper {
     List<String> whouse = ['window','front door','chimney','roof','sidewalk','gutter','dormer window','shutter','porch','shingle','balcony','foyer','doorbell','hand rail','staircase'];
     List<String> wmakeup = ['hair dye','eyeshadow','mascara','eyeliner','blusher','foundation','lipstick','lip gloss','face powder','tweezers','mirror','concealer','brush','lip liner'];
     List<String> wfamily = ['grandmother','grandfather','mother','father','uncle','aunt','brother','sister','son','daughter','cousin','grandson','granddaughter','niece','nephew'];
+
     for(int i = 0; i < cats.length; i++)  await db.insert(tableCategories, ACategory(cats[i]).toMap());
-    for(int i = 0; i< wface.length; i++) await db.insert(tableWords, AWord('Face', wface[i]).toMap());
-    for(int i = 0; i< wfruits.length; i++) await db.insert(tableWords, AWord('Fruits', wfruits[i]).toMap());
-    for(int i = 0; i< wvegetables.length; i++) await db.insert(tableWords, AWord('Vegetables', wvegetables[i]).toMap());
-    for(int i = 0; i< wcolors.length; i++) await db.insert(tableWords, AWord('Colors', wcolors[i]).toMap());
-    for(int i = 0; i< woccupations.length; i++) await db.insert(tableWords, AWord('Occupations', woccupations[i]).toMap());
-    for(int i = 0; i< wmusical.length; i++) await db.insert(tableWords, AWord('Musical Instruments', wmusical[i]).toMap());
-    for(int i = 0; i< wflowers.length; i++) await db.insert(tableWords, AWord('Flowers', wflowers[i]).toMap());
-    for(int i = 0; i< wbar.length; i++) await db.insert(tableWords, AWord('Bar', wbar[i]).toMap());
-    for(int i = 0; i< wbathroom.length; i++) await db.insert(tableWords, AWord('Bathroom', wbathroom[i]).toMap());
-    for(int i = 0; i< whouse.length; i++) await db.insert(tableWords, AWord('House', whouse[i]).toMap());
-    for(int i = 0; i< wmakeup.length; i++) await db.insert(tableWords, AWord('Makeup', wmakeup[i]).toMap());
-    for(int i = 0; i< wfamily.length; i++) await db.insert(tableWords, AWord('Family', wfamily[i]).toMap());
-    isInitialized = true;
+    for(int i = 0; i< wface.length; i++) await db.insert(tableWords, AWord('Face', wface[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wfruits.length; i++) await db.insert(tableWords, AWord('Fruits', wfruits[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wvegetables.length; i++) await db.insert(tableWords, AWord('Vegetables', wvegetables[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wcolors.length; i++) await db.insert(tableWords, AWord('Colors', wcolors[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< woccupations.length; i++) await db.insert(tableWords, AWord('Occupations', woccupations[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wmusical.length; i++) await db.insert(tableWords, AWord('Musical Instruments', wmusical[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wflowers.length; i++) await db.insert(tableWords, AWord('Flowers', wflowers[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wbar.length; i++) await db.insert(tableWords, AWord('Bar', wbar[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wbathroom.length; i++) await db.insert(tableWords, AWord('Bathroom', wbathroom[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< whouse.length; i++) await db.insert(tableWords, AWord('House', whouse[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wmakeup.length; i++) await db.insert(tableWords, AWord('Makeup', wmakeup[i].toUpperCase().replaceAll(" ", "")).toMap());
+    for(int i = 0; i< wfamily.length; i++) await db.insert(tableWords, AWord('Family', wfamily[i].toUpperCase().replaceAll(" ", "")).toMap());
     return 1;
   }
   Future<void> dropTables() async{
@@ -149,12 +152,12 @@ class DatabaseHelper {
     return id;
   }
 
-  Future<ACategory> queryCategory(String category, String time) async {
+  Future<ACategory> queryCategory(String category) async {
     Database db = await database;
     List<Map> maps = await db.query(tableCategories,
         columns: [columnCategory, columnTime],
-        where: '$columnCategory = ? and $columnTime = ?',            
-        whereArgs: [category, time]);
+        where: '$columnCategory = ?',            
+        whereArgs: [category]);
     if (maps.length > 0) {
       return ACategory.fromMap(maps.first);
     }
@@ -202,14 +205,21 @@ class DatabaseHelper {
   }
   Future<int> updateBestTime(String cat, int secs) async {
     final db = await this.database;
-    await db.update(
-      '$tableCategories',
-      ACategory.withTime(cat, secs.toString()).toMap(),
-      where: "category = ?",
-      whereArgs: [cat],
-    );
-//    var result = await db.update(table, values)
-
-
+    ACategory last = await queryCategory(cat);
+    print("${last.category} - ${last.time}");
+    int lastSec = int.parse( last.time.split(':')[1] ) + int.parse( last.time.split(':')[0] ) * 60;
+    
+    print("$lastSec $secs");
+    if(lastSec > secs || lastSec == 0){    
+      String mm = secs ~/ 60 < 10? "0" + (secs ~/ 60).toString() : (secs ~/ 60).toString();
+      String ss = secs % 60 < 10 ? "0" + secs.toString() : secs.toString();
+      return await db.update(
+        '$tableCategories',
+        ACategory.withTime(cat, "$mm:$ss").toMap(),
+        where: "category = ?",
+        whereArgs: [cat],
+      );
+    }
+    return 0;
   }
 }
