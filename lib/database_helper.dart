@@ -212,7 +212,7 @@ class DatabaseHelper {
     print("$lastSec $secs");
     if(lastSec > secs || lastSec == 0){    
       String mm = secs ~/ 60 < 10? "0" + (secs ~/ 60).toString() : (secs ~/ 60).toString();
-      String ss = secs % 60 < 10 ? "0" + secs.toString() : secs.toString();
+      String ss = secs % 60 < 10 ? "0" + (secs % 60).toString() : (secs % 60).toString();
       return await db.update(
         '$tableCategories',
         ACategory.withTime(cat, "$mm:$ss").toMap(),

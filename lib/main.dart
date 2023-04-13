@@ -370,7 +370,7 @@ class _GameWidgetState extends State<GameWidget> {
             ),
             Container(
               width: deviceWidth * 0.8,
-              height: (wordsList.length * 8).toDouble(),
+              height: (wordsList.length * 10).toDouble(),
               child: GridView.count(
                 primary: false,
                 padding: const EdgeInsets.all(0),
@@ -518,7 +518,7 @@ class CharacterMapPainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(10)), paint);
     for(int i = 0; i< gridMap.length; i++)
       for(int j = 0; j < gridMap[i].length; j++){
-          final textStyle = TextStyle( color: Colors.cyan[900], fontSize: 13, fontWeight: FontWeight.bold);
+          final textStyle = TextStyle( color: Colors.cyan[900], fontSize: 16, fontWeight: FontWeight.bold);
           final textSpan = TextSpan( text: gridMap[i][j], style: textStyle);
           final textPainter = TextPainter( text: textSpan, textDirection: TextDirection.ltr );
           textPainter.layout();
